@@ -62,7 +62,7 @@ class TouchButton():
         d(resourceId = CPTUREBUTTON_RESOURCEID).click.wait() 
         return True
 
-    def switchBackOrFrontCamera(self,status):
+    def switchBackOrFrontCamera(self,status,):
         d(resourceId = FRONTBACKBUTTON_DESCR).click.wait()
         #Dictionary
         camerastatus = {'back': '0','front':'1'}  
@@ -85,34 +85,28 @@ class TouchButton():
                 return False
         else:
             print('Current camera is ' + status)
-    
+
+    def _captureAndCheckPicCount(self,capturemode,format,delaytime):
+        beforeNo = commands.getoutput('adb shell ls /sdcard/DCIM/100ANDRO/* | grep '+ format +' | wc -l') #Get count before capturing
+        TB.takePicture(capturemode)
+        time.sleep(delaytime) #Sleep a few seconds for file saving
+        afterNo = commands.getoutput('adb shell ls /sdcard/DCIM/100ANDRO/* | grep '+ format +' | wc -l') #Get count after taking picture
+        if beforeNo == afterNo: #If the count does not raise up after capturing, case failed
+            self.fail('Taking picture/video failed!')
+
     def _confirmSettingMode(self,sub_mode,option):
         if sub_mode == 'location':
-            result = a.cmd('cat','/data/data/com.intel.camera22/shared_prefs/com.intel.camera22_preferences_0.xml | grep '+ sub_mode)
+            result = commands.getoutput('cat','/data/data/com.intel.camera22/shared_prefs/com.intel.camera22_preferences_0.xml | grep '+ sub_mode)
             if result.find(option) == -1:
                 self.fail('set camera setting ' + sub_mode + ' to ' + option + ' failed')
         else:
-            result = a.cmd('cat','/data/data/com.intel.camera22/shared_prefs/com.intel.camera22_preferences_0_0.xml | grep ' + sub_mode)
+            result = commands.getoutput('cat','/data/data/com.intel.camera22/shared_prefs/com.intel.camera22_preferences_0_0.xml | grep ' + sub_mode)
             if result.find(option) == -1:
                 self.fail('set camera setting ' + sub_mode + ' to ' + option + ' failed')            
     
     def _confirmCameraMode(self,mode):
-        if mode =='smile':
-            self._ClearData()
-            d(resourceId = CPTUREBUTTON_RESOURCEID).click.wait()
-            time.sleep(2)
-            d(resourceId = CPTUREBUTTON_RESOURCEID).click.wait()
-            result = a.cmd('adb shell ls /mnt/sdcard/DCIM/100ANDRO/*  | grep IMG | wc -l')
-            if result.find(1) != 1:
-                self.fail('set camera smile mode fail')
-        else:
-            result = a.cmd('cat','/data/data/com.intel.camera22/shared_prefs/mode_selected.xml| grep \'value="%s"\''%mode)
-            if result.find(mode) == -1:
-                self.fail('set camera '+mode +' mode fail')               
+        result = commands.getoutput('cat','/data/data/com.intel.camera22/shared_prefs/mode_selected.xml| grep \'value="%s"\''%mode)
+        if result.find(mode) == -1:
+            self.fail('set camera '+mode +' mode fail')               
 
-    def _ClearData(self):
-        commands.getoutput('adb shell am broadcast -a android.intent.action.MEDIA_MOUNTED -d file:///mnt/sdcard/')
-        time.sleep(5)
-        commands.getoutput('adb shell rm /mnt/sdcard/DCIM/100ANDRO/*')
-        time.sleep(2)
-        commands.getoutput('adb shell am broadcast -a android.intent.action.MEDIA_MOUNTED -d file:///mnt/sdcard/')        
+       
