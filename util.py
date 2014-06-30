@@ -377,7 +377,7 @@ class TouchButton():
             print('Current camera is ' + status)
     
     def confirmSettingMode(self,sub_mode,option):
-        if sub_mode == 'location':
+        if sub_mode == 'Geo_Location':
             result = commands.getoutput('adb shell cat /data/data/com.intel.camera22/shared_prefs/com.intel.camera22_preferences_0.xml | grep '+ sub_mode)
             if result.find(option) == -1:
                 self.fail('set camera setting ' + sub_mode + ' to ' + option + ' failed')
