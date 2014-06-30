@@ -79,7 +79,7 @@ DICT_OPTION_NAME  = {'Exposure'         : Exposure,
 ##################################################################################################################
 #TouchButton() Class variable
 CONFIRM_MODE_LIST       = ['video','single','depth','panorama','burst','perfectshot']
-CPTUREBUTTON_RESOURCEID ='com.intel.camera22:id/btn_mode'
+CPTUREBUTTON_RESOURCEID ='com.intel.camera22:id/shutter_button'
 FRONTBACKBUTTON_DESCR   = 'com.intel.camera22:id/shortcut_mode_2'
 CPTUREPOINT             ='adb shell input swipe 2200 1095 2200 895 '
 DRAWUP_CAPTUREBUTTON    ='adb shell input swipe 2200 1095 2200 895 '
@@ -380,7 +380,7 @@ class TouchButton():
         if sub_mode == 'Geo Location':
             result = commands.getoutput('adb shell cat /data/data/com.intel.camera22/shared_prefs/com.intel.camera22_preferences_0.xml | grep '+ sub_mode)
             if result.find(option) == -1:
-                raise Exception('set camera setting ' + sub_mode + ' to ' + option + ' failed')
+                self.fail('set camera setting ' + sub_mode + ' to ' + option + ' failed')
         else:
             result = commands.getoutput('adb shell cat /data/data/com.intel.camera22/shared_prefs/com.intel.camera22_preferences_0_0.xml | grep ' + sub_mode)
             if result.find(option) == -1:
@@ -394,14 +394,22 @@ class TouchButton():
             raise Exception('set camera '+mode +' mode fail')               
 
 
-    def captureAndCheckPicCount(self,capturemode,format,delaytime):
-        beforeNo = commands.getoutput('adb shell ls /sdcard/DCIM/100ANDRO/* | grep '+ format +' | wc -l') #Get count before capturing
-        self.takePicture(capturemode)
+    def captureAndCheckPicCount(self,capturemode,delaytime):
+        d = { 'single':'jpg', 'video':'mp4', 'smile':'jpg', 'longclick':'jpg'} 
+        beforeNo = commands.getoutput('adb shell ls /sdcard/DCIM/100ANDRO/* | grep '+ d[capturemode] +' | wc -l') #Get count before capturing
+        if capturemode == 'video':
+            self.takeVideo(delaytime)
+        else:
+            self.takePicture(capturemode)
         time.sleep(delaytime) #Sleep a few seconds for file saving
-        afterNo = commands.getoutput('adb shell ls /sdcard/DCIM/100ANDRO/* | grep '+ format +' | wc -l') #Get count after taking picture
-        if beforeNo == afterNo: #If the count does not raise up after capturing, case failed
-            raise Exception('Taking picture/video failed!')
+        afterNo = commands.getoutput('adb shell ls /sdcard/DCIM/100ANDRO/* | grep '+ d[capturemode] +' | wc -l') #Get count after taking picture
+        result = commands.getoutput('adb shell cat /data/data/com.intel.camera22/shared_prefs/mode_selected.xml| grep \'value="3"\'')
+        if result.find('value="3"') == -1:
+            if string.atoi(beforeNo) != string.atoi(afterNo) - 10:
+               raise Exception('Taking picture/video failed!')
+        else:
+            if string.atoi(beforeNo) == string.atoi(afterNo) :#If the count does not raise up after capturing, case failed
+                raise Exception('Taking picture/video failed!')
+
 
               
-
-       
