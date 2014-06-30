@@ -380,7 +380,7 @@ class TouchButton():
         if sub_mode == 'Geo Location':
             result = commands.getoutput('adb shell cat /data/data/com.intel.camera22/shared_prefs/com.intel.camera22_preferences_0.xml | grep '+ sub_mode)
             if result.find(option) == -1:
-                self.fail('set camera setting ' + sub_mode + ' to ' + option + ' failed')
+                raise Exception('set camera setting ' + sub_mode + ' to ' + option + ' failed')
         else:
             result = commands.getoutput('adb shell cat /data/data/com.intel.camera22/shared_prefs/com.intel.camera22_preferences_0_0.xml | grep ' + sub_mode)
             if result.find(option) == -1:
