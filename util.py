@@ -406,7 +406,7 @@ class TouchButton():
         result = commands.getoutput('adb shell cat /data/data/com.intel.camera22/shared_prefs/mode_selected.xml| grep \'value="3"\'')
         if result.find('value="3"') == -1:
             if string.atoi(beforeNo) != string.atoi(afterNo) - 10:
-               raise Exception('Taking picture/video failed!')
+                raise Exception('Taking picture/video failed!')
         else:
             if string.atoi(beforeNo) == string.atoi(afterNo) :#If the count does not raise up after capturing, case failed
                 raise Exception('Taking picture/video failed!')
