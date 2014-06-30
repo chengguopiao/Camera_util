@@ -384,14 +384,14 @@ class TouchButton():
         else:
             result = commands.getoutput('adb shell cat /data/data/com.intel.camera22/shared_prefs/com.intel.camera22_preferences_0_0.xml | grep ' + sub_mode)
             if result.find(option) == -1:
-                self.fail('set camera setting ' + sub_mode + ' to ' + option + ' failed')            
+                raise Exception('set camera setting ' + sub_mode + ' to ' + option + ' failed')            
     
     def confirmCameraMode(self,mode):
         mode_index = CONFIRM_MODE_LIST.index(mode) -1
         mode_new   = str(mode_index)
         result = commands.getoutput('adb shell cat /data/data/com.intel.camera22/shared_prefs/mode_selected.xml| grep \'value="%s"\''%mode_new)
         if result.find(mode_new) == -1:
-            self.fail('set camera '+mode +' mode fail')               
+            raise Exception('set camera '+mode +' mode fail')               
 
 
     def captureAndCheckPicCount(self,capturemode,format,delaytime):
@@ -400,7 +400,7 @@ class TouchButton():
         time.sleep(delaytime) #Sleep a few seconds for file saving
         afterNo = commands.getoutput('adb shell ls /sdcard/DCIM/100ANDRO/* | grep '+ format +' | wc -l') #Get count after taking picture
         if beforeNo == afterNo: #If the count does not raise up after capturing, case failed
-            self.fail('Taking picture/video failed!')
+            raise Exception('Taking picture/video failed!')
 
               
 
