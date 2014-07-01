@@ -655,36 +655,10 @@ class CameraTest(unittest.TestCase):
         tb.confirmSettingMode('Face Detection','off')
         tb.captureAndCheckPicCount('longclick',3)
 # Test case 
-    def test(self):
-        sm.switchCaptureMode('burst')   # change panorama mode
-        time.sleep(1)
-        tb.confirmCameraMode('burst')
-        so.setCameraOption('Exposure','0')
-        # step 4~5
-        tb.confirmSettingMode('Exposure','0')
-        tb.captureAndCheckPicCount('single',3)
+
 
 
 ######################################################################   
-    def _ContinuouCapturePic(self):
-        beforeNo = a.cmd('ls','/sdcard/DCIM/100ANDRO') #Get count before capturing
-        self._longclickcapture()
-        afterNo = a.cmd('ls','/sdcard/DCIM/100ANDRO') #Get count after taking picture
-        if beforeNo == afterNo: #If the count does not raise up after capturing, case failed
-            self.fail('Taking picture failed!')
-
-    def _longclickcapture(self):
-        commands.getoutput(DRAWUP_CAPTUREBUTTON + '2000')
-        time.sleep(2) 
-
-    def _CapturePic(self):
-        beforeNo = a.cmd('ls','/sdcard/DCIM/100ANDRO') #Get count before capturing
-        tb.takePicture('single')
-        time.sleep(10)
-        afterNo = a.cmd('ls','/sdcard/DCIM/100ANDRO') #Get count after taking picture
-        if beforeNo == afterNo: #If the count does not raise up after capturing, case failed
-            self.fail('Taking picture failed!')
-
 
 
     def _launchCamera(self):
