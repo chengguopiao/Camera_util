@@ -407,21 +407,24 @@ class TouchButton():
     
     def confirmSettingMode(self,sub_mode,option):
         mode = sub_mode.replace(' ', '_')
-        if mode not in SETTINGS_0:
-            result = commands.getoutput('adb shell cat /data/data/com.intel.camera22/shared_prefs/com.intel.camera22_preferences_0_0.xml | grep ' + DICT_OPTION_KEY[mode])
-            if result.find(option) == -1:
-                raise Exception('set camera setting ' + sub_mode + ' to ' + option + ' failed') 
-        else:
-            result = commands.getoutput('adb shell cat /data/data/com.intel.camera22/shared_prefs/com.intel.camera22_preferences_0.xml | grep '+ DICT_OPTION_KEY[mode])
-            if result.find(option) == -1:
-                raise Exception('set camera setting ' + sub_mode + ' to ' + option + ' failed')                 
+        if option == DEFAULT_OPTION[mode]:
+            print ('current is '+ sub_mode + option +' mode' )
+        else:            
+            if mode not in SETTINGS_0:
+                result = commands.getoutput('adb shell cat /data/data/com.intel.camera22/shared_prefs/com.intel.camera22_preferences_0_0.xml | grep ' + DICT_OPTION_KEY[mode])
+                if result.find(option) == -1:
+                    raise Exception('set camera setting ' + mode + ' to ' + option + ' failed') 
+            else:
+                result = commands.getoutput('adb shell cat /data/data/com.intel.camera22/shared_prefs/com.intel.camera22_preferences_0.xml | grep '+ DICT_OPTION_KEY[mode])
+                if result.find(option) == -1:
+                    raise Exception('set camera setting ' + mode + ' to ' + option + ' failed')                 
     
     def confirmCameraMode(self,mode):
         mode_index = CONFIRM_MODE_LIST.index(mode) -1
         mode_new   = str(mode_index)
         result = commands.getoutput('adb shell cat /data/data/com.intel.camera22/shared_prefs/mode_selected.xml| grep \'value="%s"\''%mode_new)
         if result.find(mode_new) == -1:
-            raise Exception('set camera '+mode +' mode fail')
+            raise Exception('set camera '+ mode  +' mode fail')
 
 
     def captureAndCheckPicCount(self,capturemode,delaytime=0):
