@@ -219,11 +219,24 @@ class Adb():
 class SetCaptureMode():
 
     def _swipeCaptureList(self,mode): 
-        mode_index = MODE_LIST.index(mode)
-        for i in range(mode_index):
-            # mode image coordinate: right_x_coordinate = 2252 left_x_coordinate = 2252. swipe from right to left.
-            d.swipe(2252,1044,2120,1044)
-
+        mode_index = CONFIRM_MODE_LIST.index(mode) -1        
+        result = commands.getoutput('adb shell cat /data/data/com.intel.camera22/shared_prefs/mode_selected.xml| grep currentMode')
+        a=str(result)
+        b=a[a.index('value="')+1:a.rindex('/')]
+        cmode=b[b.index('"')+1:b.rindex('"')]
+        dmode=int(cmode) + 2
+        tmode = CONFIRM_MODE_LIST.index(mode) +1
+        tg_mode =tmode - dmode       
+        if tg_mode < 0:
+            for i in range(abs(tg_mode)):
+                # mode image coordinate: right_x_coordinate = 2252 left_x_coordinate = 2252. swipe from right to left.
+                d.swipe(2120,1044,2252,1044)        
+        if tg_mode == 0:
+            print ('creent is ' + mode ' mode')      
+        if tg_mode > 0:
+            for i in range(tg_mode):
+                # mode image coordinate: right_x_coordinate = 2252 left_x_coordinate = 2252. swipe from right to left.
+                d.swipe(2252,1044,2120,1044)
     def _clickCaptureMode(self):
         # mode image center coordinate (2195,975)
         d.click(2195,975)
