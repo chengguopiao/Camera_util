@@ -36,6 +36,7 @@ Self_Timer        = ['0','3','5','10'] #_0_0
 Geo_Location      = ['off','on'] #_0
 Picture_Size      = ['WideScreen','StandardScreen'] #_0_0
 Hints             = ['off','on'] #_0_0
+Video_Size        = [['false','4'],['false','5'],['true','5'],['false','6'],['true','6']] #_0_0
 Settings_Layout   = ['Mini','Large'] #_0
 Shortcut_Button_1 = ['exposure','iso','whitebalance','flashmode','id','fdfr','scenemode','delay','geo'] #_0
 Shortcut_Button_2 = ['exposure','iso','whitebalance','flashmode','id','fdfr','scenemode','delay','geo'] #_0
@@ -54,6 +55,7 @@ DICT_OPTION_KEY   = {'Exposure'         : 'pref_camera_exposure_key',
                      'Geo_Location'     : 'pref_camera_geo_location_key',
                      'Picture_Size'     : 'pref_camera_picture_size_key',
                      'Hints'            : 'pref_camera_hints_key',
+                     'Video_Size'       : ['enable-hightspeed','pref_video_quality_key'],
                      'Settings_Layout'  : 'pref_settings_layout_key',
                      'Shortcut_Button_1': 'pref_shortcut_button1_key',
                      'Shortcut_Button_2': 'pref_shortcut_button2_key',
@@ -69,6 +71,7 @@ DICT_OPTION_NAME  = {'Exposure'         : Exposure,
                      'Geo_Location'     : Geo_Location,
                      'Picture_Size'     : Picture_Size,
                      'Hints'            : Hints,
+                     'Video_Size'       : Video_Size,
                      'Settings_Layout'  : Settings_Layout,
                      'Shortcut_Button_1': Shortcut_Button_1,
                      'Shortcut_Button_2': Shortcut_Button_2,
@@ -84,6 +87,7 @@ DEFAULT_OPTION    = {'Exposure'         : Exposure[2],
                      'Geo_Location'     : Geo_Location[1],
                      'Picture_Size'     : Picture_Size[0],
                      'Hints'            : Hints[0],
+                     'Video_Size'       : Video_Size[3],
                      'Settings_Layout'  : Settings_Layout[0],
                      'Shortcut_Button_1': Shortcut_Button_1[3],
                      'Shortcut_Button_2': Shortcut_Button_2[4],
@@ -230,16 +234,17 @@ class SetCaptureMode():
         if tg_mode < 0:
             for i in range(abs(tg_mode)):
                 # mode image coordinate: right_x_coordinate = 2252 left_x_coordinate = 2252. swipe from right to left.
-                d.swipe(2120,1044,2252,1044)        
+                d.swipe(2120,944,2252,944)
         if tg_mode == 0:
-            print ('creent is ' + mode ' mode')      
+            print ('current is ' + mode + ' mode')
         if tg_mode > 0:
             for i in range(tg_mode):
                 # mode image coordinate: right_x_coordinate = 2252 left_x_coordinate = 2252. swipe from right to left.
-                d.swipe(2252,1044,2120,1044)
+                d.swipe(2252,944,2120,944)
+
     def _clickCaptureMode(self):
         # mode image center coordinate (2195,975)
-        d.click(2195,975)
+        d.click(2195,910)
 
     def switchCaptureMode(self,mode):
         '''
@@ -287,6 +292,7 @@ class SetOption():
         y_1 = self._getSettingBounds()[2] - self._getOptionWidthAndHeight()[1]
         y_2 = self._getSettingBounds()[1] - self._getOptionWidthAndHeight()[1]
         d.swipe(x, y_1, x, y_2)
+        time.sleep(2)
 
     def _slideOptionLeftToRight(self,optiontext,diffindex):
         # --->>>
@@ -295,6 +301,7 @@ class SetOption():
         y   = self._getOptionOrdinate(optiontext)
         x_i = self._getOptionWidthAndHeight()[0] * (diffindex - 1)
         d.swipe(x_1, y, x_2 + x_i, y)
+        time.sleep(2)
 
     def _slideOptionRightToLeft(self,optiontext,diffindex):
         # <<<---
@@ -303,6 +310,7 @@ class SetOption():
         y   = self._getOptionOrdinate(optiontext)
         x_i = self._getOptionWidthAndHeight()[0] * (diffindex - 1)
         d.swipe(x_1, y, x_2 - x_i, y)
+        time.sleep(2)
 
     def setCameraOption(self,optiontext,option):
         '''
@@ -314,20 +322,28 @@ class SetOption():
         '''
         d(resourceId = 'com.intel.camera22:id/camera_settings').click.wait()
         trytimes = 1
-        while d(text = optiontext).wait.gone(timeout = 2000) and trytimes < 5:
+        while d(text = optiontext).wait.gone(timeout = 3000) and trytimes < 5:
             self._slideSettingListUp()
             trytimes = trytimes + 1
         newoptiontext = optiontext.replace(' ', '_')
         cated_0_0 = int(commands.getoutput('adb shell cat /data/data/com.intel.camera22/shared_prefs/com.intel.camera22_preferences_0_0.xml | wc -l'))
+        cated_0 = int(commands.getoutput('adb shell cat /data/data/com.intel.camera22/shared_prefs/com.intel.camera22_preferences_0.xml | wc -l'))
         #If it is the first time launching camera, there are only 4 lines in _0_0.xml. Need more logic.
-        if cated_0_0 > 4:
+        if cated_0_0 > 4 or cated_0 > 9:
             #Get the current option
-            if newoptiontext not in SETTINGS_0:
-                stringcated = commands.getoutput('adb shell cat /data/data/com.intel.camera22/shared_prefs/com.intel.camera22_preferences_0_0.xml | grep %s' %DICT_OPTION_KEY[newoptiontext])
-                currentoption = (((stringcated.split('>'))[1]).split('<'))[0]
+            if newoptiontext == 'Video_Size':
+                stringcatedone = commands.getoutput('adb shell cat /data/data/com.intel.camera22/shared_prefs/com.intel.camera22_preferences_0_0.xml | grep %s' %DICT_OPTION_KEY[newoptiontext][0])
+                stringcatedtwo = commands.getoutput('adb shell cat /data/data/com.intel.camera22/shared_prefs/com.intel.camera22_preferences_0_0.xml | grep %s' %DICT_OPTION_KEY[newoptiontext][1])
+                currenthighspeed = ((stringcatedone.split('value=\"')[1]).split('\"'))[0]
+                currentqualitykey = ((stringcatedtwo.split('>')[1]).split('<'))[0]
+                currentoption = [currenthighspeed,currentqualitykey]
             else:
-                stringcated = commands.getoutput('adb shell cat /data/data/com.intel.camera22/shared_prefs/com.intel.camera22_preferences_0.xml | grep %s' %DICT_OPTION_KEY[newoptiontext])
-                currentoption = (((stringcated.split('>'))[1]).split('<'))[0]
+                if newoptiontext not in SETTINGS_0:
+                    stringcated = commands.getoutput('adb shell cat /data/data/com.intel.camera22/shared_prefs/com.intel.camera22_preferences_0_0.xml | grep %s' %DICT_OPTION_KEY[newoptiontext])
+                    currentoption = ((stringcated.split('>')[1]).split('<'))[0]
+                else:
+                    stringcated = commands.getoutput('adb shell cat /data/data/com.intel.camera22/shared_prefs/com.intel.camera22_preferences_0.xml | grep %s' %DICT_OPTION_KEY[newoptiontext])
+                    currentoption = ((stringcated.split('>')[1]).split('<'))[0]
             #Get the current option's index and compare it with the target option
             currentindex = DICT_OPTION_NAME[newoptiontext].index(currentoption)
             targetindex  = DICT_OPTION_NAME[newoptiontext].index(option)
@@ -363,14 +379,20 @@ class SetOption():
         oldoption    = DICT_OPTION_NAME[newoptiontext].index(DEFAULT_OPTION[newoptiontext])
         targetoption = DICT_OPTION_NAME[newoptiontext].index(option)
         if oldoption != targetoption:
-            if newoptiontext not in SETTINGS_0:
-                resultoption = commands.getoutput('adb shell cat /data/data/com.intel.camera22/shared_prefs/com.intel.camera22_preferences_0_0.xml | grep %s' %DICT_OPTION_KEY[newoptiontext])
-                if resultoption.find(option) == -1:
-                    raise Exception('Set camera setting <' + optiontext + '> to <' + option + '> failed')
+            if newoptiontext == 'Video_Size':
+                resultone = commands.getoutput('adb shell cat /data/data/com.intel.camera22/shared_prefs/com.intel.camera22_preferences_0_0.xml | grep %s' %DICT_OPTION_KEY[newoptiontext][0])
+                resulttwo = commands.getoutput('adb shell cat /data/data/com.intel.camera22/shared_prefs/com.intel.camera22_preferences_0_0.xml | grep %s' %DICT_OPTION_KEY[newoptiontext][1])
+                if resultone.find(option[0]) == -1 or resulttwo.find(option[1]) == -1:
+                    raise Exception('Set camera setting <' + optiontext + '> failed')
             else:
-                resultoption = commands.getoutput('adb shell cat /data/data/com.intel.camera22/shared_prefs/com.intel.camera22_preferences_0.xml | grep %s' %DICT_OPTION_KEY[newoptiontext])
-                if resultoption.find(option) == -1:
-                    raise Exception('Set camera setting <' + optiontext + '> to <' + option + '> failed')
+                if newoptiontext not in SETTINGS_0:
+                    resultoption = commands.getoutput('adb shell cat /data/data/com.intel.camera22/shared_prefs/com.intel.camera22_preferences_0_0.xml | grep %s' %DICT_OPTION_KEY[newoptiontext])
+                    if resultoption.find(option) == -1:
+                        raise Exception('Set camera setting <' + optiontext + '> to <' + option + '> failed')
+                else:
+                    resultoption = commands.getoutput('adb shell cat /data/data/com.intel.camera22/shared_prefs/com.intel.camera22_preferences_0.xml | grep %s' %DICT_OPTION_KEY[newoptiontext])
+                    if resultoption.find(option) == -1:
+                        raise Exception('Set camera setting <' + optiontext + '> to <' + option + '> failed')
         else:
             #If the current option is the default one, there is no need for confirmation
             pass
