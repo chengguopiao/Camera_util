@@ -252,6 +252,9 @@ class SetCaptureMode():
         e.g. SetCaptureMode.switchCaptureMode('single')
         '''
         d(description = 'Show switch camera mode list').click.wait()
+        d.click(2195,910)        
+        time.sleep(2)
+        d(description = 'Show switch camera mode list').click.wait()        
         if mode == 'smile' or mode == 'hdr':
             d(text = POP_MODE[mode]).click.wait()
         elif mode == 'burstfast' or mode == 'burstslow':
